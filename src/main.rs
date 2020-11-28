@@ -2,14 +2,35 @@ use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::prelude::*;
 use std::sync::Mutex;
+use structopt::StructOpt;
 use tide::Request;
 use uuid::Uuid;
 
 static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
+#[derive(StructOpt)]
+struct Opt {
+    #[structopt(subcommand)]
+    cmd: Command,
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(rename_all = "kebab-case")]
+enum Command {
+    Copy,
+}
+
 #[async_std::main]
 async fn main() -> tide::Result<()> {
+    let opt = Opt::from_args();
+    match opt.cmd {
+        Command::Copy => copy().await?,
+    }
+    Ok(())
+}
+
+async fn copy() -> tide::Result<()> {
     let mut app = tide::new();
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
