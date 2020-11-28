@@ -21,6 +21,27 @@ enum Command {
     Copy,
 }
 
+#[derive(Debug, Deserialize)]
+struct Config {
+    prefix: String,
+}
+
+impl Config {
+    fn new() -> Self {
+        Self {
+            prefix: String::new(),
+        }
+    }
+
+    fn from_path(p: &Path) -> Self {
+        let mut s = String::new();
+        match File::open(p).and_then(|mut f| f.read_to_string(&mut s)) {
+            Ok(_) => toml::from_str(&s).unwrap_or(Self::new()),
+            Err(_) => Self::new(),
+        }
+    }
+}
+
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
