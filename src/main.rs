@@ -8,11 +8,13 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use structopt::StructOpt;
-use tide::Request;
+use tide::{http::mime, Request, Response};
 use uuid::Uuid;
 
 static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
+
+static COPY_TEMPLATE: &str = include_str!("html/copy.html");
 
 static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| {
     let home = std::env::var("HOME").unwrap();
@@ -80,7 +82,7 @@ async fn copy() -> tide::Result<()> {
     };
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(get);
+        app.at("/:id").get(get_copy);
         app.listen("127.0.0.1:4989").await
     };
     app.race(ctrlc).await?;
@@ -100,11 +102,17 @@ fn create(v: &str) -> String {
     format!("{}{}", CONFIG.prefix, k)
 }
 
-async fn get(req: Request<()>) -> tide::Result {
+async fn get_copy(req: Request<()>) -> tide::Result {
     let k = Uuid::parse_str(req.param("id")?)?;
     unsafe {
         match GLOBAL_DATA.get_mut()?.get(&k.as_u128()) {
-            Some(s) => Ok(format!("{}", s).into()),
+            Some(s) => {
+                let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
+                Ok(Response::builder(200)
+                    .body(resp)
+                    .content_type(mime::HTML)
+                    .build())
+            }
             None => Ok(tide::Response::new(404)),
         }
     }
