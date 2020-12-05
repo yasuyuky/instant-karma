@@ -1,3 +1,5 @@
+use async_ctrlc::CtrlC;
+use async_std::prelude::*;
 use once_cell::sync::Lazy;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -67,13 +69,21 @@ async fn main() -> tide::Result<()> {
 }
 
 async fn copy() -> tide::Result<()> {
-    let mut app = tide::new();
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
     stdin.read_to_string(&mut buf)?;
     println!("{}", create(&buf));
-    app.at("/:id").get(get);
-    app.listen("127.0.0.1:4989").await?;
+    let ctrlc = async {
+        CtrlC::new().expect("Cannot use CTRL-C handler").await;
+        println!("termination signal received, stopping server...");
+        Ok(())
+    };
+    let app = async {
+        let mut app = tide::new();
+        app.at("/:id").get(get);
+        app.listen("127.0.0.1:4989").await
+    };
+    app.race(ctrlc).await?;
     Ok(())
 }
 
