@@ -74,7 +74,9 @@ async fn copy() -> tide::Result<()> {
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
     stdin.read_to_string(&mut buf)?;
-    println!("{}", create(&buf));
+    let k = Uuid::new_v4();
+    put_dict(k.as_u128(), &buf);
+    println!("{}{}", CONFIG.prefix, k);
     let ctrlc = async {
         CtrlC::new().expect("Cannot use CTRL-C handler").await;
         println!("termination signal received, stopping server...");
@@ -89,17 +91,15 @@ async fn copy() -> tide::Result<()> {
     Ok(())
 }
 
-fn create(v: &str) -> String {
-    let k = Uuid::new_v4();
+fn put_dict(k: u128, v: &str) {
     unsafe {
         match GLOBAL_DATA.get_mut() {
             Ok(d) => {
-                d.insert(k.as_u128(), String::from(v));
+                d.insert(k, v.to_owned());
             }
             Err(_) => (),
         }
     }
-    format!("{}{}", CONFIG.prefix, k)
 }
 
 async fn get_copy(req: Request<()>) -> tide::Result {
