@@ -70,6 +70,12 @@ async fn main() -> tide::Result<()> {
     Ok(())
 }
 
+async fn ctrlc() -> Result<(), std::io::Error> {
+    CtrlC::new().expect("Cannot use CTRL-C handler").await;
+    println!("termination signal received, stopping server...");
+    Ok(())
+}
+
 async fn copy() -> tide::Result<()> {
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
@@ -77,17 +83,12 @@ async fn copy() -> tide::Result<()> {
     let k = Uuid::new_v4();
     put_dict(k.as_u128(), &buf);
     println!("{}{}", CONFIG.prefix, k);
-    let ctrlc = async {
-        CtrlC::new().expect("Cannot use CTRL-C handler").await;
-        println!("termination signal received, stopping server...");
-        Ok(())
-    };
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(get_copy);
         app.listen("127.0.0.1:4989").await
     };
-    app.race(ctrlc).await?;
+    app.race(ctrlc()).await?;
     Ok(())
 }
 
