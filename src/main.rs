@@ -131,7 +131,6 @@ async fn get_copy(req: Request<()>) -> tide::Result {
 }
 
 async fn view(path: &Path) -> tide::Result<()> {
-    let pathstr = path.to_str().unwrap_or_default().to_owned();
     let k = Uuid::new_v4();
     println!("{}{}", CONFIG.prefix, k);
     for entry in path.read_dir().expect("read dir") {
@@ -142,7 +141,7 @@ async fn view(path: &Path) -> tide::Result<()> {
     }
     let app = async {
         let mut app = tide::new();
-        app.at(&format!("/{}", k)).serve_dir(pathstr + "/")?;
+        app.at(&format!("/{}", k)).serve_dir(&path)?;
         app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
