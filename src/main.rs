@@ -58,7 +58,7 @@ impl Config {
     fn new() -> Self {
         Self {
             prefix: String::new(),
-            port: 4989,
+            port: default_port(),
         }
     }
 
