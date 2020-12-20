@@ -50,9 +50,7 @@ struct Config {
     port: u32,
 }
 
-fn default_port() -> u32 {
-    4989
-}
+fn default_port() -> u32 { 4989 }
 
 impl Config {
     fn new() -> Self {
