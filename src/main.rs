@@ -38,6 +38,7 @@ struct Opt {
 #[structopt(rename_all = "kebab-case")]
 enum Command {
     Copy,
+    View { path: PathBuf },
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,7 +67,14 @@ async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy => copy().await?,
+        Command::View { path } => view(&path).await?,
     }
+    Ok(())
+}
+
+async fn ctrlc() -> Result<(), std::io::Error> {
+    CtrlC::new().expect("Cannot use CTRL-C handler").await;
+    println!("termination signal received, stopping server...");
     Ok(())
 }
 
@@ -74,32 +82,27 @@ async fn copy() -> tide::Result<()> {
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
     stdin.read_to_string(&mut buf)?;
-    println!("{}", create(&buf));
-    let ctrlc = async {
-        CtrlC::new().expect("Cannot use CTRL-C handler").await;
-        println!("termination signal received, stopping server...");
-        Ok(())
-    };
+    let k = Uuid::new_v4();
+    put_dict(k.as_u128(), &buf);
+    println!("{}{}", CONFIG.prefix, k);
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(get_copy);
         app.listen("127.0.0.1:4989").await
     };
-    app.race(ctrlc).await?;
+    app.race(ctrlc()).await?;
     Ok(())
 }
 
-fn create(v: &str) -> String {
-    let k = Uuid::new_v4();
+fn put_dict(k: u128, v: &str) {
     unsafe {
         match GLOBAL_DATA.get_mut() {
             Ok(d) => {
-                d.insert(k.as_u128(), String::from(v));
+                d.insert(k, v.to_owned());
             }
             Err(_) => (),
         }
     }
-    format!("{}{}", CONFIG.prefix, k)
 }
 
 async fn get_copy(req: Request<()>) -> tide::Result {
@@ -116,4 +119,23 @@ async fn get_copy(req: Request<()>) -> tide::Result {
             None => Ok(tide::Response::new(404)),
         }
     }
+}
+
+async fn view(path: &Path) -> tide::Result<()> {
+    let pathstr = path.to_str().unwrap_or_default().to_owned();
+    let k = Uuid::new_v4();
+    println!("{}{}", CONFIG.prefix, k);
+    for entry in path.read_dir().expect("read dir") {
+        if let Ok(e) = entry {
+            let f = e.path().file_name().unwrap_or_default().to_owned();
+            println!("{}{}/{}", CONFIG.prefix, k, f.to_str().unwrap_or_default());
+        }
+    }
+    let app = async {
+        let mut app = tide::new();
+        app.at(&format!("/{}", k)).serve_dir(pathstr + "/")?;
+        app.listen("127.0.0.1:4989").await
+    };
+    app.race(ctrlc()).await?;
+    Ok(())
 }
