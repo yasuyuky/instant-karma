@@ -28,6 +28,8 @@ static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| {
 
 static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_path(&CONFIG_PATH));
 
+static LISTENER: Lazy<String> = Lazy::new(|| format!("127.0.0.1:{}", CONFIG.port));
+
 #[derive(StructOpt)]
 struct Opt {
     #[structopt(subcommand)]
@@ -44,12 +46,19 @@ enum Command {
 #[derive(Debug, Deserialize)]
 struct Config {
     prefix: String,
+    #[serde(default = "default_port")]
+    port: u32,
+}
+
+fn default_port() -> u32 {
+    4989
 }
 
 impl Config {
     fn new() -> Self {
         Self {
             prefix: String::new(),
+            port: 4989,
         }
     }
 
@@ -88,7 +97,7 @@ async fn copy() -> tide::Result<()> {
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(get_copy);
-        app.listen("127.0.0.1:4989").await
+        app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
     Ok(())
@@ -134,7 +143,7 @@ async fn view(path: &Path) -> tide::Result<()> {
     let app = async {
         let mut app = tide::new();
         app.at(&format!("/{}", k)).serve_dir(pathstr + "/")?;
-        app.listen("127.0.0.1:4989").await
+        app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
     Ok(())
