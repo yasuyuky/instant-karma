@@ -38,6 +38,7 @@ struct Opt {
 #[structopt(rename_all = "kebab-case")]
 enum Command {
     Copy,
+    View { path: PathBuf },
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,6 +67,7 @@ async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy => copy().await?,
+        Command::View { path } => view(&path).await?,
     }
     Ok(())
 }
