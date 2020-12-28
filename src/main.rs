@@ -1,34 +1,15 @@
 use async_ctrlc::CtrlC;
 use async_std::prelude::*;
-use once_cell::sync::Lazy;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
 use structopt::StructOpt;
 use tide::{http::mime, Request, Response};
 use uuid::Uuid;
 
-static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
-
-static COPY_TEMPLATE: &str = include_str!("html/copy.html");
-
-static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| {
-    let home = std::env::var("HOME").unwrap();
-    let mut path = PathBuf::from(home);
-    let default = std::env::var("XDG_CONFIG_HOME").unwrap_or(".config".to_owned());
-    path.push(default);
-    path.push("instant-karma");
-    path.push("config.toml");
-    path
-});
-
-static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_path(&CONFIG_PATH));
-
-static LISTENER: Lazy<String> = Lazy::new(|| format!("127.0.0.1:{}", CONFIG.port));
+mod statics;
+use statics::*;
 
 #[derive(StructOpt)]
 struct Opt {
@@ -44,7 +25,7 @@ enum Command {
 }
 
 #[derive(Debug, Deserialize)]
-struct Config {
+pub struct Config {
     prefix: String,
     #[serde(default = "default_port")]
     port: u32,
@@ -85,7 +66,7 @@ async fn ctrlc() -> Result<(), std::io::Error> {
     Ok(())
 }
 
-async fn copy() -> tide::Result<()> {
+pub async fn copy() -> tide::Result<()> {
     let mut buf = String::new();
     let mut stdin = std::io::stdin();
     stdin.read_to_string(&mut buf)?;
