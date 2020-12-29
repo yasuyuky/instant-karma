@@ -16,7 +16,7 @@ pub async fn copy() -> tide::Result<()> {
     println!("{}{}", CONFIG.prefix, k);
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(get_copy);
+        app.at("/:id").get(handle_get);
         app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
@@ -34,7 +34,7 @@ fn put_dict(k: u128, v: &str) {
     }
 }
 
-async fn get_copy(req: Request<()>) -> tide::Result {
+async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Uuid::parse_str(req.param("id")?)?;
     match unsafe { GLOBAL_DATA.get_mut()?.get(&k.as_u128()) } {
         Some(s) => {
