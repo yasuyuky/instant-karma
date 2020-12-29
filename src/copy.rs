@@ -36,16 +36,14 @@ fn put_dict(k: u128, v: &str) {
 
 async fn get_copy(req: Request<()>) -> tide::Result {
     let k = Uuid::parse_str(req.param("id")?)?;
-    unsafe {
-        match GLOBAL_DATA.get_mut()?.get(&k.as_u128()) {
-            Some(s) => {
-                let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
-                Ok(Response::builder(200)
-                    .body(resp)
-                    .content_type(mime::HTML)
-                    .build())
-            }
-            None => Ok(tide::Response::new(404)),
+    match unsafe { GLOBAL_DATA.get_mut()?.get(&k.as_u128()) } {
+        Some(s) => {
+            let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
+            Ok(Response::builder(200)
+                .body(resp)
+                .content_type(mime::HTML)
+                .build())
         }
+        None => Ok(tide::Response::new(404)),
     }
 }
