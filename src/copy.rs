@@ -24,19 +24,17 @@ pub async fn copy() -> tide::Result<()> {
 }
 
 fn put_dict(k: u128, v: &str) {
-    unsafe {
-        match GLOBAL_DATA.get_mut() {
-            Ok(d) => {
-                d.insert(k, v.to_owned());
-            }
-            Err(_) => (),
+    match unsafe { GLOBAL_DATA.get_mut() } {
+        Ok(d) => {
+            d.insert(k, v.to_owned());
         }
+        Err(_) => (),
     }
 }
 
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Uuid::parse_str(req.param("id")?)?;
-    match unsafe { GLOBAL_DATA.get_mut()?.get(&k.as_u128()) } {
+    match unsafe { GLOBAL_DATA.get_mut() }?.get(&k.as_u128()) {
         Some(s) => {
             let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
             Ok(Response::builder(200)
