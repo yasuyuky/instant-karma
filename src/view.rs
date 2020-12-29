@@ -1,5 +1,6 @@
 use async_std::prelude::*;
 use statics::*;
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
@@ -22,14 +23,14 @@ pub async fn view(path: &Path) -> tide::Result<()> {
     Ok(())
 }
 
-fn list_items(path: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
-    let mut result = vec![];
+fn list_items(path: &Path) -> Result<BTreeSet<PathBuf>, std::io::Error> {
+    let mut result = BTreeSet::new();
     for entry in path.read_dir().expect("read dir") {
         if let Ok(e) = entry {
             if e.metadata()?.is_file() {
-                result.push(PathBuf::from(e.path()))
+                result.insert(PathBuf::from(e.path()));
             } else if e.metadata()?.is_dir() {
-                result.append(&mut list_items(&e.path())?)
+                result.extend(list_items(&e.path())?);
             }
         }
     }
