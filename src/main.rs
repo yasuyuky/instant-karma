@@ -1,15 +1,13 @@
 use async_ctrlc::CtrlC;
-use async_std::prelude::*;
 use serde::Deserialize;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use structopt::StructOpt;
-use uuid::Uuid;
 
 mod copy;
 mod statics;
-use statics::*;
+mod view;
 
 #[derive(StructOpt)]
 struct Opt {
@@ -55,7 +53,7 @@ async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy => copy::copy().await?,
-        Command::View { path } => view(&path).await?,
+        Command::View { path } => view::view(&path).await?,
     }
     Ok(())
 }
@@ -63,23 +61,5 @@ async fn main() -> tide::Result<()> {
 async fn ctrlc() -> Result<(), std::io::Error> {
     CtrlC::new().expect("Cannot use CTRL-C handler").await;
     println!("termination signal received, stopping server...");
-    Ok(())
-}
-
-async fn view(path: &Path) -> tide::Result<()> {
-    let k = Uuid::new_v4();
-    println!("{}{}", CONFIG.prefix, k);
-    for entry in path.read_dir().expect("read dir") {
-        if let Ok(e) = entry {
-            let f = e.path().file_name().unwrap_or_default().to_owned();
-            println!("{}{}/{}", CONFIG.prefix, k, f.to_str().unwrap_or_default());
-        }
-    }
-    let app = async {
-        let mut app = tide::new();
-        app.at(&format!("/{}", k)).serve_dir(&path)?;
-        app.listen(LISTENER.to_owned()).await
-    };
-    app.race(ctrlc()).await?;
     Ok(())
 }
