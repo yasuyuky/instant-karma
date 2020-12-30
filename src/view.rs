@@ -22,7 +22,7 @@ pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Uuid::new_v4();
     println!("{}{}", CONFIG.prefix, k);
     let root = list_items(&path)?;
-    print_recursively(path, k, root);
+    print_recursively(path, k, &root);
     let app = async {
         let mut app = tide::new();
         app.at(&format!("/{}", k)).serve_dir(&path)?;
@@ -51,7 +51,7 @@ fn list_items(path: &Path) -> Result<Entry, std::io::Error> {
     })
 }
 
-fn print_recursively(base: &Path, k: Uuid, root: Entry) {
+fn print_recursively(base: &Path, k: Uuid, root: &Entry) {
     match root {
         Entry::File { path: p } => {
             let rp = p.strip_prefix(base).unwrap();
