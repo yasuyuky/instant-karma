@@ -27,6 +27,26 @@ impl Entry {
             Self::Dir { path, children: _ } => path,
         }
     }
+
+    fn pathstr(&self) -> String {
+        match self {
+            Self::File { path } => path.to_str().unwrap_or_default().to_owned(),
+            Self::Dir { path, children: _ } => path.to_str().unwrap_or_default().to_owned() + "/",
+        }
+    }
+
+    fn name(&self) -> String {
+        match self {
+            Self::File { path } => {
+                let name = path.file_name().unwrap();
+                name.to_str().unwrap_or_default().to_owned()
+            }
+            Self::Dir { path, children: _ } => {
+                let name = path.file_name().unwrap();
+                name.to_str().unwrap_or_default().to_owned() + "/"
+            }
+        }
+    }
 }
 
 impl fmt::Display for Entry {
