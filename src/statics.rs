@@ -9,6 +9,8 @@ pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
 
 pub static COPY_TEMPLATE: &str = include_str!("html/copy.html");
 
+pub static INDEX_TEMPLATE: &str = include_str!("html/index.html");
+
 pub static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| {
     let home = std::env::var("HOME").unwrap();
     let mut path = PathBuf::from(home);
