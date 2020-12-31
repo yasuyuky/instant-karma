@@ -93,14 +93,10 @@ fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
 }
 
 fn print_recursively(k: Uuid, root: &Entry) {
-    match root {
-        Entry::File { path: p } => {
-            println!("{}{}/{}", CONFIG.prefix, k, p.to_str().unwrap_or_default());
-        }
-        Entry::Dir { path: _, children } => {
-            for e in children {
-                print_recursively(k, e)
-            }
+    println!("{}{}/{}", CONFIG.prefix, k, root.pathstr());
+    if let Entry::Dir { path: _, children } = root {
+        for e in children {
+            print_recursively(k, e)
         }
     }
 }
@@ -108,18 +104,17 @@ fn print_recursively(k: Uuid, root: &Entry) {
 fn create_list_string(children: &BTreeSet<Entry>) -> String {
     let mut list = vec![];
     for e in children {
-        let ps = e.path().to_str().unwrap_or_default();
-        let name = e.path().file_name().unwrap().to_str().unwrap_or_default();
-        list.push(format!("<li><a href={}>{}</a></li>", ps, name))
+        list.push(format!("<li><a href={}>{}</a></li>", e.name(), e.name()))
     }
     list.join("\n")
 }
 
 fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, entry: &Entry) {
-    if let Entry::Dir { path: p, children } = entry {
+    if let Entry::Dir { path: _, children } = entry {
         let list = create_list_string(children);
-        let p = format!("/{}/{}", k, p.to_str().unwrap_or_default());
-        app.at(&p).get(move |r| index(list.clone(), r));
+        let p = format!("/{}/{}", k, entry.pathstr());
+        let np = p.replace("//", "/");
+        app.at(&np).get(move |r| index(list.clone(), r));
         for e in children {
             index_dirs(app, k, e)
         }
