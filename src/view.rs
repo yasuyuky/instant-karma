@@ -38,11 +38,11 @@ impl fmt::Display for Entry {
 pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Uuid::new_v4();
     println!("{}{}", CONFIG.prefix, k);
-    let root = list_items(&path)?;
-    print_recursively(path, k, &root);
+    let root = list_items(&path, &path)?;
+    print_recursively(k, &root);
     let app = async {
         let mut app = tide::new();
-        index_dirs(&mut app, &k, path, &root);
+        index_dirs(&mut app, &k, &root);
         app.at(&format!("/{}", k)).serve_dir(&path)?;
         app.listen(LISTENER.to_owned()).await
     };
@@ -50,58 +50,58 @@ pub async fn view(path: &Path) -> tide::Result<()> {
     Ok(())
 }
 
-fn list_items(path: &Path) -> Result<Entry, std::io::Error> {
+fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
     let mut result = BTreeSet::new();
     for entry in path.read_dir().expect("read dir") {
         if let Ok(e) = entry {
             if e.metadata()?.is_file() {
+                let ep = e.path();
+                let rp = ep.strip_prefix(base).unwrap();
                 result.insert(Entry::File {
-                    path: PathBuf::from(e.path()),
+                    path: PathBuf::from(rp),
                 });
             } else if e.metadata()?.is_dir() {
-                result.insert(list_items(&e.path())?);
+                result.insert(list_items(&base, &e.path())?);
             }
         }
     }
+    let rp = path.strip_prefix(base).unwrap();
     Ok(Entry::Dir {
-        path: PathBuf::from(path),
+        path: PathBuf::from(rp),
         children: result,
     })
 }
 
-fn print_recursively(base: &Path, k: Uuid, root: &Entry) {
+fn print_recursively(k: Uuid, root: &Entry) {
     match root {
         Entry::File { path: p } => {
-            let rp = p.strip_prefix(base).unwrap();
-            println!("{}{}/{}", CONFIG.prefix, k, rp.to_str().unwrap_or_default());
+            println!("{}{}/{}", CONFIG.prefix, k, p.to_str().unwrap_or_default());
         }
         Entry::Dir { path: _, children } => {
             for e in children {
-                print_recursively(base, k, e)
+                print_recursively(k, e)
             }
         }
     }
 }
 
-fn create_list_string(base: &Path, children: &BTreeSet<Entry>) -> String {
+fn create_list_string(children: &BTreeSet<Entry>) -> String {
     let mut list = vec![];
     for e in children {
-        let rp = e.path().strip_prefix(base).unwrap();
-        let rps = rp.to_str().unwrap_or_default();
-        let name = rp.file_name().unwrap().to_str().unwrap_or_default();
-        list.push(format!("<li><a href={}>{}</a></li>", rps, name))
+        let ps = e.path().to_str().unwrap_or_default();
+        let name = e.path().file_name().unwrap().to_str().unwrap_or_default();
+        list.push(format!("<li><a href={}>{}</a></li>", ps, name))
     }
     list.join("\n")
 }
 
-fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, base: &Path, entry: &Entry) {
+fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, entry: &Entry) {
     if let Entry::Dir { path: p, children } = entry {
-        let rp = p.strip_prefix(base).unwrap();
-        let list = create_list_string(base, children);
-        let p = format!("/{}/{}", k, rp.to_str().unwrap_or_default());
+        let list = create_list_string(children);
+        let p = format!("/{}/{}", k, p.to_str().unwrap_or_default());
         app.at(&p).get(move |r| index(list.clone(), r));
         for e in children {
-            index_dirs(app, k, base, e)
+            index_dirs(app, k, e)
         }
     }
 }
