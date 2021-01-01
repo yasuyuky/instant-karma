@@ -59,7 +59,6 @@ pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Uuid::new_v4();
     println!("{}{}", CONFIG.prefix, k);
     let root = list_items(&path, &path)?;
-    print_recursively(k, &root);
     let app = async {
         let mut app = tide::new();
         index_dirs(&mut app, &k, &root);
@@ -90,15 +89,6 @@ fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
         path: PathBuf::from(rp),
         children: result,
     })
-}
-
-fn print_recursively(k: Uuid, root: &Entry) {
-    println!("{}{}/{}", CONFIG.prefix, k, root.pathstr());
-    if let Entry::Dir { path: _, children } = root {
-        for e in children {
-            print_recursively(k, e)
-        }
-    }
 }
 
 fn create_list_string(current: &Path, children: &BTreeSet<Entry>) -> String {
