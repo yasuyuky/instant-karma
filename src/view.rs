@@ -27,6 +27,26 @@ impl Entry {
             Self::Dir { path, children: _ } => path,
         }
     }
+
+    fn pathstr(&self) -> String {
+        match self {
+            Self::File { path } => path.to_str().unwrap_or_default().to_owned(),
+            Self::Dir { path, children: _ } => path.to_str().unwrap_or_default().to_owned() + "/",
+        }
+    }
+
+    fn name(&self) -> String {
+        match self {
+            Self::File { path } => {
+                let name = path.file_name().unwrap();
+                name.to_str().unwrap_or_default().to_owned()
+            }
+            Self::Dir { path, children: _ } => {
+                let name = path.file_name().unwrap();
+                name.to_str().unwrap_or_default().to_owned() + "/"
+            }
+        }
+    }
 }
 
 impl fmt::Display for Entry {
@@ -37,9 +57,8 @@ impl fmt::Display for Entry {
 
 pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Uuid::new_v4();
-    println!("{}{}", CONFIG.prefix, k);
+    println!("{}{}/", CONFIG.prefix, k);
     let root = list_items(&path, &path)?;
-    print_recursively(k, &root);
     let app = async {
         let mut app = tide::new();
         index_dirs(&mut app, &k, &root);
@@ -72,34 +91,22 @@ fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
     })
 }
 
-fn print_recursively(k: Uuid, root: &Entry) {
-    match root {
-        Entry::File { path: p } => {
-            println!("{}{}/{}", CONFIG.prefix, k, p.to_str().unwrap_or_default());
-        }
-        Entry::Dir { path: _, children } => {
-            for e in children {
-                print_recursively(k, e)
-            }
-        }
-    }
-}
-
-fn create_list_string(children: &BTreeSet<Entry>) -> String {
+fn create_list_string(current: &Path, children: &BTreeSet<Entry>) -> String {
     let mut list = vec![];
+    if let Some(_) = current.parent() {
+        list.push(format!("<li><a href=../>..</a></li>"))
+    };
     for e in children {
-        let ps = e.path().to_str().unwrap_or_default();
-        let name = e.path().file_name().unwrap().to_str().unwrap_or_default();
-        list.push(format!("<li><a href={}>{}</a></li>", ps, name))
+        list.push(format!("<li><a href={}>{}</a></li>", e.name(), e.name()))
     }
     list.join("\n")
 }
 
 fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, entry: &Entry) {
-    if let Entry::Dir { path: p, children } = entry {
-        let list = create_list_string(children);
-        let p = format!("/{}/{}", k, p.to_str().unwrap_or_default());
-        app.at(&p).get(move |r| index(list.clone(), r));
+    if let Entry::Dir { path: c, children } = entry {
+        let list = create_list_string(c, children);
+        let np = format!("/{}/{}", k, entry.pathstr()).replace("//", "/");
+        app.at(&np).get(move |r| index(list.clone(), r));
         for e in children {
             index_dirs(app, k, e)
         }
