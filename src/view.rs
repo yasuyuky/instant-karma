@@ -57,7 +57,7 @@ impl fmt::Display for Entry {
 
 pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Uuid::new_v4();
-    println!("{}{}", CONFIG.prefix, k);
+    println!("{}{}/", CONFIG.prefix, k);
     let root = list_items(&path, &path)?;
     let app = async {
         let mut app = tide::new();
