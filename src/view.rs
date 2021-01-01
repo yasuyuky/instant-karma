@@ -101,8 +101,11 @@ fn print_recursively(k: Uuid, root: &Entry) {
     }
 }
 
-fn create_list_string(children: &BTreeSet<Entry>) -> String {
+fn create_list_string(current: &Path, children: &BTreeSet<Entry>) -> String {
     let mut list = vec![];
+    if let Some(_) = current.parent() {
+        list.push(format!("<li><a href=../>..</a></li>"))
+    };
     for e in children {
         list.push(format!("<li><a href={}>{}</a></li>", e.name(), e.name()))
     }
@@ -110,10 +113,9 @@ fn create_list_string(children: &BTreeSet<Entry>) -> String {
 }
 
 fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, entry: &Entry) {
-    if let Entry::Dir { path: _, children } = entry {
-        let list = create_list_string(children);
-        let p = format!("/{}/{}", k, entry.pathstr());
-        let np = p.replace("//", "/");
+    if let Entry::Dir { path: c, children } = entry {
+        let list = create_list_string(c, children);
+        let np = format!("/{}/{}", k, entry.pathstr()).replace("//", "/");
         app.at(&np).get(move |r| index(list.clone(), r));
         for e in children {
             index_dirs(app, k, e)
