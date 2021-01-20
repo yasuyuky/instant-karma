@@ -18,6 +18,6 @@ async-std = { version="1.8.0", features=["attributes"]}
 structopt = "0.3.21"
 
 toml = "0.5.8"
-serde = "1.0.119"
+serde = "1.0.120"
 async-ctrlc = "1.2.0"
 html-escape = "0.2.6"
