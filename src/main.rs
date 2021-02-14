@@ -4,6 +4,7 @@ use structopt::StructOpt;
 
 mod config;
 mod copy;
+mod render;
 mod statics;
 mod view;
 
@@ -17,6 +18,7 @@ struct Opt {
 #[structopt(rename_all = "kebab-case")]
 enum Command {
     Copy,
+    Render,
     View { path: PathBuf },
 }
 
@@ -25,6 +27,7 @@ async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy => copy::copy().await?,
+        Command::Render => render::render().await?,
         Command::View { path } => view::view(&path).await?,
     }
     Ok(())
