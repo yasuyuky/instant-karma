@@ -1,11 +1,9 @@
+use crate::ctrlc;
+use crate::statics::*;
 use async_std::prelude::*;
-use statics::*;
 use std::io::prelude::*;
 use tide::{http::mime, Request, Response};
 use uuid::Uuid;
-
-use crate::ctrlc;
-use crate::statics;
 
 pub async fn copy() -> tide::Result<()> {
     let mut buf = String::new();
