@@ -21,15 +21,6 @@ pub async fn copy() -> tide::Result<()> {
     Ok(())
 }
 
-fn put_dict(k: u128, v: &str) {
-    match unsafe { GLOBAL_DATA.get_mut() } {
-        Ok(d) => {
-            d.insert(k, v.to_owned());
-        }
-        Err(_) => (),
-    }
-}
-
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Uuid::parse_str(req.param("id")?)?;
     match unsafe { GLOBAL_DATA.get_mut() }?.get(&k.as_u128()) {
