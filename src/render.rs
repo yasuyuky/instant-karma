@@ -29,10 +29,11 @@ async fn handle_get(req: Request<()>) -> tide::Result {
             let mut options = Options::empty();
             options.insert(Options::ENABLE_STRIKETHROUGH);
             let parser = Parser::new_ext(s, options);
-            let mut html_output: String = String::with_capacity(s.len() * 3 / 2);
-            html::push_html(&mut html_output, parser);
+            let mut rendered = String::with_capacity(s.len() * 3 / 2);
+            html::push_html(&mut rendered, parser);
+            let resp = RENDER_TEMPLATE.replace("{}", &rendered);
             Ok(Response::builder(200)
-                .body(html_output)
+                .body(resp)
                 .content_type(mime::HTML)
                 .build())
         }

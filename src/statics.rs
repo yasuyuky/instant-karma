@@ -9,6 +9,8 @@ pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
 
 pub static COPY_TEMPLATE: &str = include_str!("html/copy.html");
 
+pub static RENDER_TEMPLATE: &str = include_str!("html/render.html");
+
 pub static INDEX_TEMPLATE: &str = include_str!("html/index.html");
 
 pub static CONFIG_PATH: Lazy<PathBuf> = Lazy::new(|| {
