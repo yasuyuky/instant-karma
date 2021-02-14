@@ -21,3 +21,4 @@ toml = "0.5.8"
 serde = "1.0.123"
 async-ctrlc = "1.2.0"
 html-escape = "0.2.6"
+pulldown-cmark = { version = "0.8.0", default-features = false }
