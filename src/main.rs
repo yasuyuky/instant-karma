@@ -17,8 +17,8 @@ struct Opt {
 #[derive(Debug, StructOpt)]
 #[structopt(rename_all = "kebab-case")]
 enum Command {
-    Copy,
-    Render,
+    Copy { path: Option<PathBuf> },
+    Render { path: Option<PathBuf> },
     View { path: PathBuf },
 }
 
@@ -26,8 +26,8 @@ enum Command {
 async fn main() -> tide::Result<()> {
     let opt = Opt::from_args();
     match opt.cmd {
-        Command::Copy => copy::copy().await?,
-        Command::Render => render::render().await?,
+        Command::Copy { path } => copy::copy(&path).await?,
+        Command::Render { path } => render::render(&path).await?,
         Command::View { path } => view::view(&path).await?,
     }
     Ok(())

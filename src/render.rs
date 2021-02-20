@@ -2,11 +2,12 @@ use crate::ctrlc;
 use crate::statics::*;
 use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
+use std::path::PathBuf;
 use tide::{http::mime, Request, Response};
 use uuid::Uuid;
 
-pub async fn render() -> tide::Result<()> {
-    let k = load_stdin_to_dict()?;
+pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
+    let k = load_input_to_dict(path)?;
     println!("{}{}", CONFIG.prefix, k);
     let app = async {
         let mut app = tide::new();
