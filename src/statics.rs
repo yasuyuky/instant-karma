@@ -55,3 +55,10 @@ pub fn load_file_to_dict(path: &Path) -> Result<Uuid, std::io::Error> {
     put_dict(k.as_u128(), &buf);
     Ok(k)
 }
+
+pub fn load_input_to_dict(path: Option<PathBuf>) -> Result<Uuid, std::io::Error> {
+    match path {
+        Some(p) => load_file_to_dict(&p),
+        None => load_stdin_to_dict(),
+    }
+}
