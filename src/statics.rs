@@ -1,8 +1,10 @@
 use crate::config::Config;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
+use std::io::{stdin, Read};
 use std::path::PathBuf;
 use std::sync::Mutex;
+use uuid::Uuid;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -34,4 +36,13 @@ pub fn put_dict(k: u128, v: &str) {
         }
         Err(_) => (),
     }
+}
+
+pub fn load_stdin_to_dict() -> Result<Uuid, std::io::Error> {
+    let mut buf = String::new();
+    let mut stdin = stdin();
+    stdin.read_to_string(&mut buf)?;
+    let k = Uuid::new_v4();
+    put_dict(k.as_u128(), &buf);
+    Ok(k)
 }
