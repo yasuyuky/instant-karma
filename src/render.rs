@@ -2,16 +2,11 @@ use crate::ctrlc;
 use crate::statics::*;
 use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
-use std::io::prelude::*;
 use tide::{http::mime, Request, Response};
 use uuid::Uuid;
 
 pub async fn render() -> tide::Result<()> {
-    let mut buf = String::new();
-    let mut stdin = std::io::stdin();
-    stdin.read_to_string(&mut buf)?;
-    let k = Uuid::new_v4();
-    put_dict(k.as_u128(), &buf);
+    let k = load_stdin_to_dict()?;
     println!("{}{}", CONFIG.prefix, k);
     let app = async {
         let mut app = tide::new();
