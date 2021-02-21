@@ -23,7 +23,7 @@ impl Config {
     pub fn from_path(p: &Path) -> Self {
         let mut s = String::new();
         match File::open(p).and_then(|mut f| f.read_to_string(&mut s)) {
-            Ok(_) => toml::from_str(&s).unwrap_or(Self::new()),
+            Ok(_) => toml::from_str(&s).unwrap_or_else(|_| Self::new()),
             Err(_) => Self::new(),
         }
     }
