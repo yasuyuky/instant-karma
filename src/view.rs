@@ -93,8 +93,8 @@ fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
 
 fn create_list_string(current: &Path, children: &BTreeSet<Entry>) -> String {
     let mut list = vec![];
-    if let Some(_) = current.parent() {
-        list.push(format!("<li><a href=../>..</a></li>"))
+    if current.parent().is_some() {
+        list.push("<li><a href=../>..</a></li>".to_owned())
     };
     for e in children {
         list.push(format!("<li><a href={}>{}</a></li>", e.name(), e.name()))
