@@ -30,11 +30,8 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_path(&CONFIG_PATH));
 pub static LISTENER: Lazy<String> = Lazy::new(|| format!("127.0.0.1:{}", CONFIG.port));
 
 pub fn put_dict(k: u128, v: &str) {
-    match unsafe { GLOBAL_DATA.get_mut() } {
-        Ok(d) => {
-            d.insert(k, v.to_owned());
-        }
-        Err(_) => (),
+    if let Ok(d) = unsafe { GLOBAL_DATA.get_mut() } {
+        d.insert(k, v.to_owned());
     }
 }
 
