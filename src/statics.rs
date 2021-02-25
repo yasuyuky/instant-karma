@@ -67,15 +67,19 @@ static MODIFIED: Lazy<async_std::sync::Mutex<bool>> =
     Lazy::new(|| async_std::sync::Mutex::new(false));
 
 pub fn watch_path(path: &Path) {
-    let (tx, rx) = channel();
-    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
-    watcher.watch(&path, RecursiveMode::NonRecursive).unwrap();
-    std::thread::spawn(move || loop {
-        match rx.recv().unwrap() {
-            _ => {
-                let mut b = async_std::task::block_on(MODIFIED.lock());
-                *b = true;
+    let p = PathBuf::from(path);
+    std::thread::spawn(move || {
+        let (tx, rx) = channel();
+        let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+        watcher.watch(p, RecursiveMode::Recursive).unwrap();
+        loop {
+            match rx.recv().unwrap() {
+                _ => {
+                    let mut b = async_std::task::block_on(MODIFIED.lock());
+                    *b = true;
+                }
             }
+            println!("modified");
         }
     });
 }
