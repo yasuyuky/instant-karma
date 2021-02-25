@@ -1,9 +1,12 @@
 use crate::config::Config;
+use notify::{watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::{stdin, Read};
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
 use std::sync::Mutex;
+use std::time::Duration;
 use uuid::Uuid;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
@@ -58,4 +61,38 @@ pub fn load_input_to_dict(path: &Option<PathBuf>) -> Result<Uuid, std::io::Error
         Some(p) => load_file_to_dict(&p),
         None => load_stdin_to_dict(),
     }
+}
+
+static MODIFIED: Lazy<async_std::sync::Mutex<bool>> =
+    Lazy::new(|| async_std::sync::Mutex::new(false));
+
+pub fn watch_path(path: &Path) {
+    let (tx, rx) = channel();
+    let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+    watcher.watch(&path, RecursiveMode::NonRecursive).unwrap();
+    std::thread::spawn(move || loop {
+        match rx.recv().unwrap() {
+            _ => {
+                let mut b = async_std::task::block_on(MODIFIED.lock());
+                *b = true;
+            }
+        }
+    });
+}
+
+pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
+    let (atx, arx) = async_channel::unbounded();
+    async_std::task::spawn(async move {
+        loop {
+            let mut b = MODIFIED.lock().await;
+            if *b {
+                *b = false;
+                atx.send(true).await.unwrap();
+            } else {
+                drop(b);
+                async_std::task::sleep(Duration::from_secs(1)).await;
+            }
+        }
+    });
+    arx
 }
