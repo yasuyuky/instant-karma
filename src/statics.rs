@@ -38,28 +38,26 @@ pub fn put_dict(k: u128, v: &str) {
     }
 }
 
-pub fn load_stdin_to_dict() -> Result<Uuid, std::io::Error> {
+pub fn load_stdin_to_dict(k: &Uuid) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut stdin = stdin();
     stdin.read_to_string(&mut buf)?;
-    let k = Uuid::new_v4();
     put_dict(k.as_u128(), &buf);
-    Ok(k)
+    Ok(())
 }
 
-pub fn load_file_to_dict(path: &Path) -> Result<Uuid, std::io::Error> {
+pub fn load_file_to_dict(k: &Uuid, path: &Path) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut f = std::fs::File::open(path)?;
     f.read_to_string(&mut buf)?;
-    let k = Uuid::new_v4();
     put_dict(k.as_u128(), &buf);
-    Ok(k)
+    Ok(())
 }
 
-pub fn load_input_to_dict(path: &Option<PathBuf>) -> Result<Uuid, std::io::Error> {
+pub fn load_input_to_dict(k: &Uuid, path: &Option<PathBuf>) -> Result<(), std::io::Error> {
     match path {
-        Some(p) => load_file_to_dict(&p),
-        None => load_stdin_to_dict(),
+        Some(p) => load_file_to_dict(k, &p),
+        None => load_stdin_to_dict(k),
     }
 }
 
