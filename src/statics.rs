@@ -92,8 +92,8 @@ pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
                 atx.send(true).await.unwrap();
             } else {
                 drop(b);
-                async_std::task::sleep(Duration::from_secs(1)).await;
             }
+            async_std::task::sleep(Duration::from_secs(1)).await;
         }
     });
     arx
