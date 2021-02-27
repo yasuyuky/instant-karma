@@ -6,7 +6,8 @@ use tide::{http::mime, Request, Response};
 use uuid::Uuid;
 
 pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
-    let k = load_input_to_dict(path)?;
+    let k = Uuid::new_v4();
+    load_input_to_dict(&k, path)?;
     println!("{}{}", CONFIG.prefix, k);
     let app = async {
         let mut app = tide::new();
