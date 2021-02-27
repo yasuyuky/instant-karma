@@ -10,6 +10,12 @@
 
 <body class="markdown-body">
 {}
+<script>
+let eventSource = new EventSource("/{id}/sse");
+eventSource.onmessage = function(event) {
+  location.reload();
+};
+</script>
 </body>
 
 </html>
