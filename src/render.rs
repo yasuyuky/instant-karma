@@ -50,7 +50,9 @@ async fn handle_get(req: Request<()>) -> tide::Result {
             let parser = Parser::new_ext(s, options);
             let mut rendered = String::new();
             html::push_html(&mut rendered, parser);
-            let resp = RENDER_TEMPLATE.replace("{}", &rendered);
+            let resp = RENDER_TEMPLATE
+                .replace("{id}", &k.to_string())
+                .replace("{}", &rendered);
             Ok(Response::builder(200)
                 .body(resp)
                 .content_type(mime::HTML)
