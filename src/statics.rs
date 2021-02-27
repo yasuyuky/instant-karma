@@ -1,9 +1,12 @@
 use crate::config::Config;
+use notify::{watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::{stdin, Read};
 use std::path::{Path, PathBuf};
+use std::sync::mpsc::channel;
 use std::sync::Mutex;
+use std::time::Duration;
 use uuid::Uuid;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
@@ -35,27 +38,62 @@ pub fn put_dict(k: u128, v: &str) {
     }
 }
 
-pub fn load_stdin_to_dict() -> Result<Uuid, std::io::Error> {
+pub fn load_stdin_to_dict(k: &Uuid) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut stdin = stdin();
     stdin.read_to_string(&mut buf)?;
-    let k = Uuid::new_v4();
     put_dict(k.as_u128(), &buf);
-    Ok(k)
+    Ok(())
 }
 
-pub fn load_file_to_dict(path: &Path) -> Result<Uuid, std::io::Error> {
+pub fn load_file_to_dict(k: &Uuid, path: &Path) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut f = std::fs::File::open(path)?;
     f.read_to_string(&mut buf)?;
-    let k = Uuid::new_v4();
     put_dict(k.as_u128(), &buf);
-    Ok(k)
+    Ok(())
 }
 
-pub fn load_input_to_dict(path: &Option<PathBuf>) -> Result<Uuid, std::io::Error> {
+pub fn load_input_to_dict(k: &Uuid, path: &Option<PathBuf>) -> Result<(), std::io::Error> {
     match path {
-        Some(p) => load_file_to_dict(&p),
-        None => load_stdin_to_dict(),
+        Some(p) => load_file_to_dict(k, &p),
+        None => load_stdin_to_dict(k),
     }
+}
+
+static MODIFIED: Lazy<async_std::sync::Mutex<bool>> =
+    Lazy::new(|| async_std::sync::Mutex::new(false));
+
+pub fn watch_path(path: &Path) {
+    let p = PathBuf::from(path);
+    std::thread::spawn(move || {
+        let (tx, rx) = channel();
+        let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
+        watcher.watch(p, RecursiveMode::Recursive).unwrap();
+        loop {
+            match rx.recv().unwrap() {
+                _ => {
+                    let mut b = async_std::task::block_on(MODIFIED.lock());
+                    *b = true;
+                }
+            }
+        }
+    });
+}
+
+pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
+    let (atx, arx) = async_channel::unbounded();
+    async_std::task::spawn(async move {
+        loop {
+            let mut b = MODIFIED.lock().await;
+            if *b {
+                *b = false;
+                atx.send(true).await.unwrap();
+            } else {
+                drop(b);
+            }
+            async_std::task::sleep(Duration::from_secs(1)).await;
+        }
+    });
+    arx
 }
