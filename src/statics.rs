@@ -77,7 +77,6 @@ pub fn watch_path(path: &Path) {
                     *b = true;
                 }
             }
-            println!("modified");
         }
     });
 }
