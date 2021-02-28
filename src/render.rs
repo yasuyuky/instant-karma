@@ -12,9 +12,9 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(handle_get);
-        if let Some(p) = path.clone() {
-            load_path(&p);
-            watch_path(&p.clone());
+        if let Some(p) = path {
+            load_path(p);
+            watch_path(p);
             app.at("/:id/sse").get(sse::endpoint(handle_sse_req));
         }
         app.listen(LISTENER.to_owned()).await
