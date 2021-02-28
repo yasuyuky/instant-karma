@@ -88,7 +88,7 @@ pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
             let mut b = MODIFIED.lock().await;
             if *b {
                 *b = false;
-                atx.send(true).await.unwrap();
+                atx.send(true).await.unwrap_or_default();
             } else {
                 drop(b);
             }
