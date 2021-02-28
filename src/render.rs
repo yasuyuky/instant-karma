@@ -1,13 +1,10 @@
 use crate::ctrlc;
 use crate::statics::*;
 use async_std::prelude::*;
-use once_cell::sync::Lazy;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
 use uuid::Uuid;
-
-static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, &path)?;
