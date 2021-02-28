@@ -117,3 +117,8 @@ where
         };
     }
 }
+
+pub fn load_path(p: &Path) {
+    let mut mgp = async_std::task::block_on(PATH.lock());
+    *mgp = PathBuf::from(&p);
+}
