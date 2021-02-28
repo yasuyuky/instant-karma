@@ -1,15 +1,10 @@
 use crate::ctrlc;
 use crate::statics::*;
 use async_std::prelude::*;
-use async_std::sync::Mutex;
-use once_cell::sync::Lazy;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
 use uuid::Uuid;
-
-static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
-static PATH: Lazy<Mutex<std::path::PathBuf>> = Lazy::new(|| Mutex::new(PathBuf::new()));
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, &path)?;
@@ -17,23 +12,10 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(handle_get);
-        if let Some(p) = path.clone() {
-            let mut mgp = async_std::task::block_on(PATH.lock());
-            *mgp = PathBuf::from(&p);
-            drop(mgp);
-            watch_path(&p.clone());
-            app.at("/:id/sse")
-                .get(sse::endpoint(|_req, sender| async move {
-                    let arx = async_watch_modified();
-                    loop {
-                        match arx.recv().await? {
-                            _ => {
-                                load_file_to_dict(&KEY, &PATH.lock().await)?;
-                                sender.send("", "", None).await?;
-                            }
-                        };
-                    }
-                }));
+        if let Some(p) = path {
+            load_path(p);
+            watch_path(p);
+            app.at("/:id/sse").get(sse::endpoint(handle_sse_req));
         }
         app.listen(LISTENER.to_owned()).await
     };
