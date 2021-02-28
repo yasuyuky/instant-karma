@@ -100,7 +100,7 @@ pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
     arx
 }
 
-static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
+pub static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
 static PATH: Lazy<AsyncMutex<PathBuf>> = Lazy::new(|| AsyncMutex::new(PathBuf::new()));
 
 pub async fn handle_sse_req<State>(_req: Request<State>, sender: Sender) -> Result<(), tide::Error>
