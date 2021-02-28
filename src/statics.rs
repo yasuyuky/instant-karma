@@ -63,8 +63,7 @@ pub fn load_input_to_dict(k: &Uuid, path: &Option<PathBuf>) -> Result<(), std::i
     }
 }
 
-static MODIFIED: Lazy<async_std::sync::Mutex<bool>> =
-    Lazy::new(|| async_std::sync::Mutex::new(false));
+static MODIFIED: Lazy<AsyncMutex<bool>> = Lazy::new(|| AsyncMutex::new(false));
 
 pub fn watch_path(path: &Path) {
     let p = PathBuf::from(path);
