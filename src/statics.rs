@@ -101,10 +101,16 @@ pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
 pub static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
 static PATH: Lazy<AsyncMutex<PathBuf>> = Lazy::new(|| AsyncMutex::new(PathBuf::new()));
 
-pub async fn handle_sse_req<State>(_req: Request<State>, sender: Sender) -> Result<(), tide::Error>
+pub async fn handle_sse_req<State>(req: Request<State>, sender: Sender) -> Result<(), tide::Error>
 where
     State: Clone + Send + Sync + 'static,
 {
+    if *KEY != Uuid::parse_str(req.param("id")?)? {
+        return Err(tide::Error::new(
+            403,
+            std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
+        ));
+    }
     let arx = async_watch_modified();
     loop {
         match arx.recv().await? {
