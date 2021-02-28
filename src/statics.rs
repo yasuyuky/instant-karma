@@ -1,4 +1,5 @@
 use crate::config::Config;
+use async_std::sync::Mutex as AsyncMutex;
 use notify::{watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
@@ -7,6 +8,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::sync::Mutex;
 use std::time::Duration;
+use tide::{sse::Sender, Request};
 use uuid::Uuid;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
@@ -96,4 +98,22 @@ pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
         }
     });
     arx
+}
+
+static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
+static PATH: Lazy<AsyncMutex<PathBuf>> = Lazy::new(|| AsyncMutex::new(PathBuf::new()));
+
+pub async fn handle_sse_req<State>(_req: Request<State>, sender: Sender) -> Result<(), tide::Error>
+where
+    State: Clone + Send + Sync + 'static,
+{
+    let arx = async_watch_modified();
+    loop {
+        match arx.recv().await? {
+            _ => {
+                load_file_to_dict(&KEY, &PATH.lock().await)?;
+                sender.send("", "", None).await?;
+            }
+        };
+    }
 }
