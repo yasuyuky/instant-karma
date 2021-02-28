@@ -11,9 +11,9 @@
 <body class="markdown-body">
 {}
 <script>
-let eventSource = new EventSource("/{id}/sse");
-eventSource.onmessage = function(event) {
-  location.reload();
+document.body.onload = ev => {
+  let eventSource = new EventSource("/{id}/sse");
+  eventSource.onmessage = event => { location.reload() };
 };
 </script>
 </body>
