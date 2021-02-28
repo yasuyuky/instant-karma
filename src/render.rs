@@ -22,18 +22,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
             *mgp = PathBuf::from(&p);
             drop(mgp);
             watch_path(&p.clone());
-            app.at("/:id/sse")
-                .get(sse::endpoint(|_req, sender| async move {
-                    let arx = async_watch_modified();
-                    loop {
-                        match arx.recv().await? {
-                            _ => {
-                                load_file_to_dict(&KEY, &PATH.lock().await)?;
-                                sender.send("", "", None).await?;
-                            }
-                        };
-                    }
-                }));
+            app.at("/:id/sse").get(sse::endpoint(handle_sse_req));
         }
         app.listen(LISTENER.to_owned()).await
     };
