@@ -9,7 +9,6 @@ use std::path::{Path, PathBuf};
 use std::sync::{mpsc::channel, Mutex};
 use std::time::Duration;
 use tide::{sse::Sender, Request};
-use uuid::Uuid;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<Key, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
