@@ -1,4 +1,5 @@
 use crate::statics::CONFIG;
+use std::fmt;
 use uuid::Uuid;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -16,4 +17,8 @@ impl Key {
 
 impl From<&str> for Key {
     fn from(s: &str) -> Self { Self { key: s.to_owned() } }
+}
+
+impl fmt::Display for Key {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { write!(f, "{}", self.key) }
 }
