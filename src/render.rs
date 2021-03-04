@@ -1,10 +1,10 @@
 use crate::ctrlc;
+use crate::key::Key;
 use crate::statics::*;
 use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
-use uuid::Uuid;
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, &path)?;
@@ -24,8 +24,8 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
 }
 
 async fn handle_get(req: Request<()>) -> tide::Result {
-    let k = Uuid::parse_str(req.param("id")?)?;
-    match unsafe { GLOBAL_DATA.get_mut() }?.get(&k.as_u128()) {
+    let k = Key::from(req.param("id")?);
+    match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
             let mut options = Options::empty();
             options.insert(Options::ENABLE_STRIKETHROUGH);

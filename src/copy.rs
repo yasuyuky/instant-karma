@@ -1,14 +1,13 @@
 use crate::ctrlc;
+use crate::key::Key;
 use crate::statics::*;
 use async_std::prelude::*;
 use std::path::PathBuf;
 use tide::{http::mime, Request, Response};
-use uuid::Uuid;
 
 pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
-    let k = Uuid::new_v4();
-    load_input_to_dict(&k, path)?;
-    println!("{}{}", CONFIG.prefix, k);
+    load_input_to_dict(&KEY, path)?;
+    println!("{}{}", CONFIG.prefix, *KEY);
     let app = async {
         let mut app = tide::new();
         app.at("/:id").get(handle_get);
@@ -19,8 +18,8 @@ pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
 }
 
 async fn handle_get(req: Request<()>) -> tide::Result {
-    let k = Uuid::parse_str(req.param("id")?)?;
-    match unsafe { GLOBAL_DATA.get_mut() }?.get(&k.as_u128()) {
+    let k = Key::from(req.param("id")?);
+    match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
             let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
             Ok(Response::builder(200)

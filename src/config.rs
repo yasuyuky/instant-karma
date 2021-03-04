@@ -8,15 +8,19 @@ pub struct Config {
     pub prefix: String,
     #[serde(default = "default_port")]
     pub port: u32,
+    #[serde(default = "default_length")]
+    pub length: usize,
 }
 
 fn default_port() -> u32 { 4989 }
+fn default_length() -> usize { 13 }
 
 impl Config {
     pub fn new() -> Self {
         Self {
             prefix: String::new(),
             port: default_port(),
+            length: default_length(),
         }
     }
 
