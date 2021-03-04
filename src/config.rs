@@ -13,7 +13,7 @@ pub struct Config {
 }
 
 fn default_port() -> u32 { 4989 }
-fn default_length() -> usize { 10 }
+fn default_length() -> usize { 13 }
 
 impl Config {
     pub fn new() -> Self {
