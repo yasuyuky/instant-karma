@@ -5,7 +5,6 @@ use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
-use uuid::Uuid;
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, &path)?;

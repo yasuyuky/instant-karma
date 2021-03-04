@@ -4,7 +4,6 @@ use crate::statics::*;
 use async_std::prelude::*;
 use std::path::PathBuf;
 use tide::{http::mime, Request, Response};
-use uuid::Uuid;
 
 pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, path)?;
