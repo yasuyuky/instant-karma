@@ -9,9 +9,8 @@ pub struct Key {
 
 impl Key {
     pub fn new() -> Self {
-        Self {
-            key: format!("{:l$}", Uuid::new_v4(), l = CONFIG.length),
-        }
+        let s = &Uuid::new_v4().to_string()[0..CONFIG.length];
+        Self { key: s.to_owned() }
     }
 }
 
