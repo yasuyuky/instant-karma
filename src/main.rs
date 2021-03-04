@@ -4,6 +4,7 @@ use structopt::StructOpt;
 
 mod config;
 mod copy;
+mod key;
 mod render;
 mod statics;
 mod view;
