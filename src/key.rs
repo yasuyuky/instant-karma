@@ -13,3 +13,7 @@ impl Key {
         }
     }
 }
+
+impl From<&str> for Key {
+    fn from(s: &str) -> Self { Self { key: s.to_owned() } }
+}
