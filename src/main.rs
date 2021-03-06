@@ -5,9 +5,11 @@ use structopt::StructOpt;
 mod config;
 mod copy;
 mod key;
+mod load;
 mod render;
 mod statics;
 mod view;
+mod watch;
 
 #[derive(StructOpt)]
 struct Opt {
