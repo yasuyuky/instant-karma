@@ -1,12 +1,12 @@
 use crate::config::Config;
+use crate::key::Key;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::io::{stdin, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use uuid::Uuid;
 
-pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<u128, String>>> =
+pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<Key, String>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static COPY_TEMPLATE: &str = include_str!("html/copy.html");
@@ -29,33 +29,33 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_path(&CONFIG_PATH));
 
 pub static LISTENER: Lazy<String> = Lazy::new(|| format!("127.0.0.1:{}", CONFIG.port));
 
-pub fn put_dict(k: u128, v: &str) {
+pub fn put_dict(k: &Key, v: &str) {
     if let Ok(d) = unsafe { GLOBAL_DATA.get_mut() } {
-        d.insert(k, v.to_owned());
+        d.insert(k.clone(), v.to_owned());
     }
 }
 
-pub fn load_stdin_to_dict(k: &Uuid) -> Result<(), std::io::Error> {
+pub fn load_stdin_to_dict(k: &Key) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut stdin = stdin();
     stdin.read_to_string(&mut buf)?;
-    put_dict(k.as_u128(), &buf);
+    put_dict(k, &buf);
     Ok(())
 }
 
-pub fn load_file_to_dict(k: &Uuid, path: &Path) -> Result<(), std::io::Error> {
+pub fn load_file_to_dict(k: &Key, path: &Path) -> Result<(), std::io::Error> {
     let mut buf = String::new();
     let mut f = std::fs::File::open(path)?;
     f.read_to_string(&mut buf)?;
-    put_dict(k.as_u128(), &buf);
+    put_dict(k, &buf);
     Ok(())
 }
 
-pub fn load_input_to_dict(k: &Uuid, path: &Option<PathBuf>) -> Result<(), std::io::Error> {
+pub fn load_input_to_dict(k: &Key, path: &Option<PathBuf>) -> Result<(), std::io::Error> {
     match path {
         Some(p) => load_file_to_dict(k, &p),
         None => load_stdin_to_dict(k),
     }
 }
 
-pub static KEY: Lazy<Uuid> = Lazy::new(|| Uuid::new_v4());
+pub static KEY: Lazy<Key> = Lazy::new(|| Key::new());
