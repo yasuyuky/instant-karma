@@ -1,5 +1,6 @@
 use crate::ctrlc;
 use crate::key::Key;
+use crate::load::load_input_to_dict;
 use crate::statics::*;
 use crate::watch::{handle_sse_req, load_path, watch_path};
 use async_std::prelude::*;

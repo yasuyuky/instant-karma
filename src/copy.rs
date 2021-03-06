@@ -1,5 +1,6 @@
 use crate::ctrlc;
 use crate::key::Key;
+use crate::load::load_input_to_dict;
 use crate::statics::*;
 use async_std::prelude::*;
 use std::path::PathBuf;
