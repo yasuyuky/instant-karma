@@ -1,3 +1,4 @@
+use crate::key::Key;
 use crate::statics::*;
 use async_std::sync::Mutex as AsyncMutex;
 use notify::{watcher, RecursiveMode, Watcher};
@@ -48,7 +49,7 @@ pub async fn handle_sse_req<State>(req: Request<State>, sender: Sender) -> Resul
 where
     State: Clone + Send + Sync + 'static,
 {
-    if *KEY != Uuid::parse_str(req.param("id")?)? {
+    if *KEY != Key::from(req.param("id")?) {
         return Err(tide::Error::new(
             403,
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
