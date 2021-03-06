@@ -2,8 +2,7 @@ use crate::config::Config;
 use crate::key::Key;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
-use std::io::{stdin, Read};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<Key, String>>> =

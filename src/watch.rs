@@ -8,7 +8,6 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use tide::{sse::Sender, Request};
-use uuid::Uuid;
 
 static MODIFIED: Lazy<AsyncMutex<bool>> = Lazy::new(|| AsyncMutex::new(false));
 
