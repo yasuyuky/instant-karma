@@ -1,5 +1,6 @@
 use crate::ctrlc;
 use crate::statics::*;
+use crate::watch::{handle_sse_req, load_path, watch_path};
 use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;

@@ -7,6 +7,7 @@ mod copy;
 mod render;
 mod statics;
 mod view;
+mod watch;
 
 #[derive(StructOpt)]
 struct Opt {
