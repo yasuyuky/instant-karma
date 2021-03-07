@@ -49,26 +49,23 @@ pub async fn handle_sse_req<State>(req: Request<State>, sender: Sender) -> Resul
 where
     State: Clone + Send + Sync + 'static,
 {
-    if *KEY != Key::from(req.param("id")?) {
-        return Err(tide::Error::new(
-            403,
-            std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
-        ));
+    let key = Key::from(req.param("id")?);
+    let path = PathBuf::from(req.param("path")?);
+    if let Ok(d) = unsafe { GLOBAL_DATA.lock() } {
+        if !d.contains_key(&key) {
+            return Err(tide::Error::new(
+                403,
+                std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
+            ));
+        }
     }
     let arx = async_watch_modified();
     loop {
         match arx.recv().await? {
             _ => {
-                load_file_to_dict(&KEY, &PATH.lock().await)?;
+                load_file_to_dict(&key, &path)?;
                 sender.send("", "", None).await?;
             }
         };
     }
-}
-
-static PATH: Lazy<AsyncMutex<PathBuf>> = Lazy::new(|| AsyncMutex::new(PathBuf::new()));
-
-pub fn load_path(p: &Path) {
-    let mut mgp = async_std::task::block_on(PATH.lock());
-    *mgp = PathBuf::from(&p);
 }

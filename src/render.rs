@@ -2,22 +2,25 @@ use crate::ctrlc;
 use crate::key::Key;
 use crate::load::load_input_to_dict;
 use crate::statics::*;
-use crate::watch::{handle_sse_req, load_path, watch_path};
+use crate::watch::{handle_sse_req, watch_path};
 use async_std::prelude::*;
 use pulldown_cmark::{html, Options, Parser};
 use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
-    load_input_to_dict(&KEY, &path)?;
-    println!("{}{}", CONFIG.prefix, *KEY);
+    let k = Key::new();
+    load_input_to_dict(&k, &path)?;
+    print!("{}{}", CONFIG.prefix, &k);
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(handle_get);
+        app.at("/:id/*path").get(handle_get);
         if let Some(p) = path {
-            load_path(p);
+            println!("/{}", p.to_str().unwrap());
             watch_path(p);
-            app.at("/:id/sse").get(sse::endpoint(handle_sse_req));
+            app.at("/sse/:id/*path").get(sse::endpoint(handle_sse_req));
+        } else {
+            println!("");
         }
         app.listen(LISTENER.to_owned()).await
     };
@@ -27,6 +30,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
 
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Key::from(req.param("id")?);
+    let path = req.param("path")?;
     match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
             let mut options = Options::empty();
@@ -36,6 +40,7 @@ async fn handle_get(req: Request<()>) -> tide::Result {
             html::push_html(&mut rendered, parser);
             let resp = RENDER_TEMPLATE
                 .replace("{id}", &k.to_string())
+                .replace("{path}", path)
                 .replace("{}", &rendered);
             Ok(Response::builder(200)
                 .body(resp)
