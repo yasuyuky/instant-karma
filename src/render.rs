@@ -10,14 +10,16 @@ use tide::{http::mime, sse, Request, Response};
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, &path)?;
-    println!("{}{}", CONFIG.prefix, *KEY);
+    print!("{}{}", CONFIG.prefix, *KEY);
     let app = async {
         let mut app = tide::new();
         app.at("/:id/*path").get(handle_get);
         if let Some(p) = path {
-            println!("{}{}/{}", CONFIG.prefix, *KEY, p.to_str().unwrap());
+            println!("/{}", p.to_str().unwrap());
             watch_path(p);
             app.at("/:id/sse/*path").get(sse::endpoint(handle_sse_req));
+        } else {
+            println!("");
         }
         app.listen(LISTENER.to_owned()).await
     };
