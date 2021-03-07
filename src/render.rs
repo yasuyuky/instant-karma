@@ -15,6 +15,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
         let mut app = tide::new();
         app.at("/:id/*path").get(handle_get);
         if let Some(p) = path {
+            println!("{}{}/{}", CONFIG.prefix, *KEY, p.to_str().unwrap());
             watch_path(p);
             app.at("/:id/sse/*path").get(sse::endpoint(handle_sse_req));
         }
