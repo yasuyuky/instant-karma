@@ -9,8 +9,9 @@ use std::path::PathBuf;
 use tide::{http::mime, sse, Request, Response};
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
-    load_input_to_dict(&KEY, &path)?;
-    print!("{}{}", CONFIG.prefix, *KEY);
+    let k = Key::new();
+    load_input_to_dict(&k, &path)?;
+    print!("{}{}", CONFIG.prefix, &k);
     let app = async {
         let mut app = tide::new();
         app.at("/:id/*path").get(handle_get);
