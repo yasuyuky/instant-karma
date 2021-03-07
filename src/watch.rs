@@ -49,7 +49,9 @@ pub async fn handle_sse_req<State>(req: Request<State>, sender: Sender) -> Resul
 where
     State: Clone + Send + Sync + 'static,
 {
-    if *KEY != Key::from(req.param("id")?) {
+    let key = Key::from(req.param("id")?);
+    let path = PathBuf::from(req.param("path")?);
+    if *KEY != key {
         return Err(tide::Error::new(
             403,
             std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
@@ -59,7 +61,7 @@ where
     loop {
         match arx.recv().await? {
             _ => {
-                load_file_to_dict(&KEY, &PATH.lock().await)?;
+                load_file_to_dict(&key, &path)?;
                 sender.send("", "", None).await?;
             }
         };
