@@ -51,11 +51,13 @@ where
 {
     let key = Key::from(req.param("id")?);
     let path = PathBuf::from(req.param("path")?);
-    if *KEY != key {
-        return Err(tide::Error::new(
-            403,
-            std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
-        ));
+    if let Ok(d) = unsafe { GLOBAL_DATA.lock() } {
+        if !d.contains_key(&key) {
+            return Err(tide::Error::new(
+                403,
+                std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
+            ));
+        }
     }
     let arx = async_watch_modified();
     loop {
