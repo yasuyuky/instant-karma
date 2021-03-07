@@ -12,7 +12,7 @@
 {}
 <script>
 document.body.onload = ev => {
-  let eventSource = new EventSource("/{id}/sse");
+  let eventSource = new EventSource("/{id}/sse/{path}");
   eventSource.onmessage = event => { location.reload() };
 };
 </script>

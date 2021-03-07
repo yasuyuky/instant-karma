@@ -27,6 +27,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
 
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Key::from(req.param("id")?);
+    let path = req.param("path")?;
     match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
             let mut options = Options::empty();
@@ -36,6 +37,7 @@ async fn handle_get(req: Request<()>) -> tide::Result {
             html::push_html(&mut rendered, parser);
             let resp = RENDER_TEMPLATE
                 .replace("{id}", &k.to_string())
+                .replace("{path}", path)
                 .replace("{}", &rendered);
             Ok(Response::builder(200)
                 .body(resp)
