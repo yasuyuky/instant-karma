@@ -13,11 +13,11 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     println!("{}{}", CONFIG.prefix, *KEY);
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(handle_get);
+        app.at("/:id/*path").get(handle_get);
         if let Some(p) = path {
             load_path(p);
             watch_path(p);
-            app.at("/:id/sse").get(sse::endpoint(handle_sse_req));
+            app.at("/:id/sse/*path").get(sse::endpoint(handle_sse_req));
         }
         app.listen(LISTENER.to_owned()).await
     };
