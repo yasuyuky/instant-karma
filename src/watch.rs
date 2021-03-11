@@ -4,37 +4,40 @@ use crate::statics::*;
 use async_std::sync::Mutex as AsyncMutex;
 use notify::{watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::mpsc::channel;
 use std::time::Duration;
 use tide::{sse::Sender, Request};
 
-static MODIFIED: Lazy<AsyncMutex<bool>> = Lazy::new(|| AsyncMutex::new(false));
+static MODIFIED: Lazy<AsyncMutex<HashMap<PathBuf, bool>>> =
+    Lazy::new(|| AsyncMutex::new(HashMap::new()));
 
 pub fn watch_path(path: &Path) {
     let p = PathBuf::from(path);
     std::thread::spawn(move || {
         let (tx, rx) = channel();
         let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
-        watcher.watch(p, RecursiveMode::Recursive).unwrap();
+        watcher.watch(p.clone(), RecursiveMode::Recursive).unwrap();
         loop {
             match rx.recv().unwrap() {
                 _ => {
                     let mut b = async_std::task::block_on(MODIFIED.lock());
-                    *b = true;
+                    (*b).insert(p.clone(), true);
                 }
             }
         }
     });
 }
 
-pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
+pub fn async_watch_modified(path: &Path) -> async_std::channel::Receiver<bool> {
     let (atx, arx) = async_channel::unbounded();
+    let p = PathBuf::from(path);
     async_std::task::spawn(async move {
         loop {
             let mut b = MODIFIED.lock().await;
-            if *b {
-                *b = false;
+            if (*b)[&p] {
+                (*b).insert(p.clone(), false);
                 atx.send(true).await.unwrap_or_default();
             } else {
                 drop(b);
@@ -59,7 +62,7 @@ where
             ));
         }
     }
-    let arx = async_watch_modified();
+    let arx = async_watch_modified(&path);
     loop {
         match arx.recv().await? {
             _ => {
