@@ -30,7 +30,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
 
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Key::from(req.param("id")?);
-    let path = req.param("path")?;
+    let path = req.param("path").unwrap_or("");
     match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
             let mut options = Options::empty();
