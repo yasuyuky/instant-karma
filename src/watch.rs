@@ -28,7 +28,7 @@ pub fn watch_path(path: &Path) {
     });
 }
 
-pub fn async_watch_modified() -> async_std::channel::Receiver<bool> {
+pub fn async_watch_modified(path: &Path) -> async_std::channel::Receiver<bool> {
     let (atx, arx) = async_channel::unbounded();
     async_std::task::spawn(async move {
         loop {
@@ -59,7 +59,7 @@ where
             ));
         }
     }
-    let arx = async_watch_modified();
+    let arx = async_watch_modified(&path);
     loop {
         match arx.recv().await? {
             _ => {
