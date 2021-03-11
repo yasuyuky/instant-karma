@@ -20,7 +20,7 @@ structopt = "0.3.21"
 toml = "0.5.8"
 serde = "1.0.124"
 async-ctrlc = "1.2.0"
-html-escape = "0.2.6"
+html-escape = "0.2.7"
 pulldown-cmark = { version = "0.8.0", default-features = false }
 
 async-channel = "1.6.1"
