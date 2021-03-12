@@ -36,12 +36,11 @@ pub fn async_watch_modified(path: &Path) -> async_std::channel::Receiver<bool> {
     async_std::task::spawn(async move {
         loop {
             let mut b = MODIFIED.lock().await;
-            if (*b)[&p] {
+            if *(*b).get(&p).unwrap_or(&false) {
                 (*b).insert(p.clone(), false);
                 atx.send(true).await.unwrap_or_default();
-            } else {
-                drop(b);
             }
+            drop(b);
             async_std::task::sleep(Duration::from_secs(1)).await;
         }
     });
