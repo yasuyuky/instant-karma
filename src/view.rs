@@ -4,9 +4,9 @@ use std::collections::BTreeSet;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use tide::{http::mime, Request, Response};
-use uuid::Uuid;
 
 use crate::ctrlc;
+use crate::key::Key;
 use crate::statics;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -56,7 +56,7 @@ impl fmt::Display for Entry {
 }
 
 pub async fn view(path: &Path) -> tide::Result<()> {
-    let k = Uuid::new_v4();
+    let k = Key::new();
     println!("{}{}/", CONFIG.prefix, k);
     let root = list_items(&path, &path)?;
     let app = async {
@@ -102,7 +102,7 @@ fn create_list_string(current: &Path, children: &BTreeSet<Entry>) -> String {
     list.join("\n")
 }
 
-fn index_dirs(app: &mut tide::Server<()>, k: &Uuid, entry: &Entry) {
+fn index_dirs(app: &mut tide::Server<()>, k: &Key, entry: &Entry) {
     if let Entry::Dir { path: c, children } = entry {
         let list = create_list_string(c, children);
         let np = format!("/{}/{}", k, entry.pathstr()).replace("//", "/");
