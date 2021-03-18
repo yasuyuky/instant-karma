@@ -11,7 +11,7 @@ pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
     println!("{}{}", CONFIG.prefix, *KEY);
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(handle_get);
+        app.at("/:id/*path").get(handle_get);
         app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
