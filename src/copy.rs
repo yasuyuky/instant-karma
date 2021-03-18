@@ -8,10 +8,15 @@ use tide::{http::mime, Request, Response};
 
 pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, path)?;
-    println!("{}{}", CONFIG.prefix, *KEY);
+    println!(
+        "{}{}/{}",
+        CONFIG.prefix,
+        *KEY,
+        path.clone().unwrap_or_default().to_str().unwrap()
+    );
     let app = async {
         let mut app = tide::new();
-        app.at("/:id").get(handle_get);
+        app.at("/:id/*path").get(handle_get);
         app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
@@ -20,9 +25,12 @@ pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
 
 async fn handle_get(req: Request<()>) -> tide::Result {
     let k = Key::from(req.param("id")?);
+    let path = req.param("path").unwrap_or("");
     match unsafe { GLOBAL_DATA.get_mut() }?.get(&k) {
         Some(s) => {
-            let resp = COPY_TEMPLATE.replace("{}", &html_escape::encode_text(s));
+            let resp = COPY_TEMPLATE
+                .replace("{path}", path)
+                .replace("{}", &html_escape::encode_text(s));
             Ok(Response::builder(200)
                 .body(resp)
                 .content_type(mime::HTML)
