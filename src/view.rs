@@ -113,9 +113,10 @@ fn index_dirs(app: &mut tide::Server<()>, k: &Key, entry: &Entry) {
     }
 }
 
-async fn index(list: String, _: Request<()>) -> tide::Result {
+async fn index(list: String, req: Request<()>) -> tide::Result {
+    let url = req.url();
     Ok(Response::builder(200)
-        .body(INDEX_TEMPLATE.replace("{}", &list))
+        .body(INDEX_TEMPLATE.replace("{title}", &url.path()).replace("{}", &list))
         .content_type(mime::HTML)
         .build())
 }
