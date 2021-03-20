@@ -12,6 +12,7 @@ pub struct Config {
     pub length: usize,
 }
 
+fn default_prefix() -> String { "http://localhost:4989/".to_owned() }
 fn default_port() -> u32 { 4989 }
 fn default_length() -> usize { 13 }
 
