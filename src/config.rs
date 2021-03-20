@@ -5,6 +5,7 @@ use std::path::Path;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(default = "default_prefix")]
     pub prefix: String,
     #[serde(default = "default_port")]
     pub port: u32,
@@ -19,7 +20,7 @@ fn default_length() -> usize { 13 }
 impl Config {
     pub fn new() -> Self {
         Self {
-            prefix: String::new(),
+            prefix: default_prefix(),
             port: default_port(),
             length: default_length(),
         }
