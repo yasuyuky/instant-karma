@@ -28,4 +28,4 @@ pub static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_path(&CONFIG_PATH));
 
 pub static LISTENER: Lazy<String> = Lazy::new(|| format!("127.0.0.1:{}", CONFIG.port));
 
-pub static KEY: Lazy<Key> = Lazy::new(|| Key::new());
+pub static KEY: Lazy<Key> = Lazy::new(Key::new);

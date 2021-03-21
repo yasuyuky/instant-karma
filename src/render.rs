@@ -20,7 +20,7 @@ pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
             watch_path(p);
             app.at("/sse/:id/*path").get(sse::endpoint(handle_sse_req));
         } else {
-            println!("");
+            println!();
         }
         app.listen(LISTENER.to_owned()).await
     };
