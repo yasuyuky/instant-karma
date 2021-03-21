@@ -20,12 +20,9 @@ pub fn watch_path(path: &Path) {
         let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
         watcher.watch(p.clone(), RecursiveMode::Recursive).unwrap();
         loop {
-            match rx.recv().unwrap() {
-                _ => {
-                    let mut b = async_std::task::block_on(MODIFIED.lock());
-                    (*b).insert(p.clone(), true);
-                }
-            }
+            rx.recv().unwrap();
+            let mut b = async_std::task::block_on(MODIFIED.lock());
+            (*b).insert(p.clone(), true);
         }
     });
 }
