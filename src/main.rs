@@ -6,6 +6,7 @@ mod config;
 mod copy;
 mod key;
 mod load;
+mod logger;
 mod render;
 mod statics;
 mod view;
