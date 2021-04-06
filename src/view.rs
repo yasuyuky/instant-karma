@@ -57,7 +57,7 @@ impl fmt::Display for Entry {
 
 pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Key::new();
-    println!("{}{}/", CONFIG.prefix, k);
+    log::info!("{}{}/", CONFIG.prefix, k);
     let root = list_items(&path, &path)?;
     let app = async {
         let mut app = tide::new();
@@ -116,7 +116,11 @@ fn index_dirs(app: &mut tide::Server<()>, k: &Key, entry: &Entry) {
 async fn index(list: String, req: Request<()>) -> tide::Result {
     let url = req.url();
     Ok(Response::builder(200)
-        .body(INDEX_TEMPLATE.replace("{title}", &url.path()).replace("{}", &list))
+        .body(
+            INDEX_TEMPLATE
+                .replace("{title}", &url.path())
+                .replace("{}", &list),
+        )
         .content_type(mime::HTML)
         .build())
 }

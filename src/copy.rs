@@ -8,7 +8,7 @@ use tide::{http::mime, Request, Response};
 
 pub async fn copy(path: &Option<PathBuf>) -> tide::Result<()> {
     load_input_to_dict(&KEY, path)?;
-    println!(
+    log::info!(
         "{}{}/{}",
         CONFIG.prefix,
         *KEY,

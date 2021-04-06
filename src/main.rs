@@ -6,6 +6,7 @@ mod config;
 mod copy;
 mod key;
 mod load;
+mod logger;
 mod render;
 mod statics;
 mod view;
@@ -27,6 +28,8 @@ enum Command {
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
+    log::set_logger(&logger::CONSOLE_LOGGER).unwrap_or_default();
+    log::set_max_level(log::LevelFilter::Info);
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy { path } => copy::copy(&path).await?,
@@ -38,6 +41,6 @@ async fn main() -> tide::Result<()> {
 
 async fn ctrlc() -> Result<(), std::io::Error> {
     CtrlC::new().expect("Cannot use CTRL-C handler").await;
-    println!("termination signal received, stopping server...");
+    log::info!("termination signal received, stopping server...");
     Ok(())
 }

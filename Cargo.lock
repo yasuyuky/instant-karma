@@ -995,6 +995,7 @@ dependencies = [
  "async-ctrlc",
  "async-std",
  "html-escape",
+ "log",
  "notify",
  "once_cell",
  "pulldown-cmark",
