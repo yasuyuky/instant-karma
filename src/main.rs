@@ -41,6 +41,6 @@ async fn main() -> tide::Result<()> {
 
 async fn ctrlc() -> Result<(), std::io::Error> {
     CtrlC::new().expect("Cannot use CTRL-C handler").await;
-    println!("termination signal received, stopping server...");
+    log::info!("termination signal received, stopping server...");
     Ok(())
 }
