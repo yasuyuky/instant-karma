@@ -28,6 +28,8 @@ enum Command {
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
+    log::set_logger(&logger::CONSOLE_LOGGER).unwrap_or_default();
+    log::set_max_level(log::LevelFilter::Info);
     let opt = Opt::from_args();
     match opt.cmd {
         Command::Copy { path } => copy::copy(&path).await?,
