@@ -895,9 +895,9 @@ dependencies = [
 
 [[package]]
 name = "html-escape"
-version = "0.2.7"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d64794b2265e97e459334ed47a7b7369ce8e8ee3d3450c0c363a0b563fc92233"
+checksum = "816ea801a95538fc5f53c836697b3f8b64a9d664c4f0b91efe1fe7c92e4dbcb7"
 dependencies = [
  "utf8-width",
 ]
