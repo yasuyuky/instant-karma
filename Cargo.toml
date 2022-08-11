@@ -11,7 +11,7 @@ name = "ik"
 path = "src/main.rs"
 
 [dependencies]
-async-channel = "1.7.0"
+async-channel = "1.7.1"
 async-ctrlc = "1.2.0"
 async-std = {version="1.11.0", features=["attributes"]}
 html-escape = "0.2.11"
