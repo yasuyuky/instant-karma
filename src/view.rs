@@ -71,17 +71,15 @@ pub async fn view(path: &Path) -> tide::Result<()> {
 
 fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
     let mut result = BTreeSet::new();
-    for entry in path.read_dir().expect("read dir") {
-        if let Ok(e) = entry {
-            if e.metadata()?.is_file() {
-                let ep = e.path();
-                let rp = ep.strip_prefix(base).unwrap();
-                result.insert(Entry::File {
-                    path: PathBuf::from(rp),
-                });
-            } else if e.metadata()?.is_dir() {
-                result.insert(list_items(&base, &e.path())?);
-            }
+    for entry in path.read_dir().expect("read dir").flatten() {
+        if entry.metadata()?.is_file() {
+            let ep = entry.path();
+            let rp = ep.strip_prefix(base).unwrap();
+            result.insert(Entry::File {
+                path: PathBuf::from(rp),
+            });
+        } else if entry.metadata()?.is_dir() {
+            result.insert(list_items(&base, &entry.path())?);
         }
     }
     let rp = path.strip_prefix(base).unwrap();
