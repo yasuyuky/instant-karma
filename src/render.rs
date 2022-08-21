@@ -10,7 +10,7 @@ use tide::{http::mime, sse, Request, Response};
 
 pub async fn render(path: &Option<PathBuf>) -> tide::Result<()> {
     let k = Key::new();
-    load_input_to_dict(&k, &path)?;
+    load_input_to_dict(&k, path)?;
     print!("{}{}", CONFIG.prefix, &k);
     let app = async {
         let mut app = tide::new();

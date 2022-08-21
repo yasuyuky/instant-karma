@@ -58,7 +58,7 @@ impl fmt::Display for Entry {
 pub async fn view(path: &Path) -> tide::Result<()> {
     let k = Key::new();
     log::info!("{}{}/", CONFIG.prefix, k);
-    let root = list_items(&path, &path)?;
+    let root = list_items(path, path)?;
     let app = async {
         let mut app = tide::new();
         index_dirs(&mut app, &k, &root);
@@ -79,7 +79,7 @@ fn list_items(base: &Path, path: &Path) -> Result<Entry, std::io::Error> {
                 path: PathBuf::from(rp),
             });
         } else if entry.metadata()?.is_dir() {
-            result.insert(list_items(&base, &entry.path())?);
+            result.insert(list_items(base, &entry.path())?);
         }
     }
     let rp = path.strip_prefix(base).unwrap();
@@ -116,7 +116,7 @@ async fn index(list: String, req: Request<()>) -> tide::Result {
     Ok(Response::builder(200)
         .body(
             INDEX_TEMPLATE
-                .replace("{title}", &url.path())
+                .replace("{title}", url.path())
                 .replace("{}", &list),
         )
         .content_type(mime::HTML)
