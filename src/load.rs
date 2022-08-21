@@ -27,7 +27,7 @@ pub fn load_file_to_dict(k: &Key, path: &Path) -> Result<(), std::io::Error> {
 
 pub fn load_input_to_dict(k: &Key, path: &Option<PathBuf>) -> Result<(), std::io::Error> {
     match path {
-        Some(p) => load_file_to_dict(k, &p),
+        Some(p) => load_file_to_dict(k, p),
         None => load_stdin_to_dict(k),
     }
 }
