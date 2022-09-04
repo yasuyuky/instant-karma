@@ -2,7 +2,7 @@ use crate::key::Key;
 use crate::load::load_file_to_dict;
 use crate::statics::*;
 use async_std::sync::Mutex as AsyncMutex;
-use notify::{watcher, RecursiveMode, Watcher};
+use notify::{recommended_watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -17,12 +17,13 @@ pub fn watch_path(path: &Path) {
     let p = PathBuf::from(path);
     std::thread::spawn(move || {
         let (tx, rx) = channel();
-        let mut watcher = watcher(tx, Duration::from_secs(1)).unwrap();
-        watcher.watch(p.clone(), RecursiveMode::Recursive).unwrap();
+        let mut watcher = recommended_watcher(tx).unwrap();
+        watcher.watch(&p, RecursiveMode::Recursive).unwrap();
         loop {
-            rx.recv().unwrap();
-            let mut b = async_std::task::block_on(MODIFIED.lock());
-            (*b).insert(p.clone(), true);
+            if rx.recv().unwrap().is_ok() {
+                let mut b = async_std::task::block_on(MODIFIED.lock());
+                (*b).insert(p.clone(), true);
+            }
         }
     });
 }
