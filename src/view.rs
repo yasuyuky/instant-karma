@@ -62,7 +62,7 @@ pub async fn view(path: &Path) -> tide::Result<()> {
     let app = async {
         let mut app = tide::new();
         index_dirs(&mut app, &k, &root);
-        app.at(&format!("/{}", k)).serve_dir(&path)?;
+        app.at(&format!("/{}", k)).serve_dir(path)?;
         app.listen(LISTENER.to_owned()).await
     };
     app.race(ctrlc()).await?;
