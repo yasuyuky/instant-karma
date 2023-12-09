@@ -16,7 +16,7 @@ async-ctrlc = "1.2.0"
 async-std = {version="1.11.0", features=["attributes"]}
 html-escape = "0.2.13"
 notify = "6.1.1"
-once_cell = "1.18.0"
+once_cell = "1.19.0"
 pulldown-cmark = {version = "0.9.3", default-features = false }
 serde = "1.0.193"
 structopt = "0.3.26"
