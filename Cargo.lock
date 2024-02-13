@@ -1116,7 +1116,7 @@ dependencies = [
 name = "instant-karma"
 version = "0.1.0"
 dependencies = [
- "async-channel 1.9.0",
+ "async-channel 2.1.1",
  "async-ctrlc",
  "async-std",
  "html-escape",

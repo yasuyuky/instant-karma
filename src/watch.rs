@@ -29,7 +29,7 @@ pub fn watch_path(path: &Path) {
 }
 
 fn async_watch_modified(path: &Path) -> async_std::channel::Receiver<bool> {
-    let (atx, arx) = async_channel::unbounded();
+    let (atx, arx) = async_std::channel::unbounded();
     let p = PathBuf::from(path);
     async_std::task::spawn(async move {
         loop {
