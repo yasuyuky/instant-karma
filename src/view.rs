@@ -24,14 +24,14 @@ impl Entry {
     fn path(&self) -> &PathBuf {
         match self {
             Self::File { path } => path,
-            Self::Dir { path, children: _ } => path,
+            Self::Dir { path, .. } => path,
         }
     }
 
     fn pathstr(&self) -> String {
         match self {
             Self::File { path } => path.to_str().unwrap_or_default().to_owned(),
-            Self::Dir { path, children: _ } => path.to_str().unwrap_or_default().to_owned() + "/",
+            Self::Dir { path, .. } => path.to_str().unwrap_or_default().to_owned() + "/",
         }
     }
 
@@ -41,7 +41,7 @@ impl Entry {
                 let name = path.file_name().unwrap();
                 name.to_str().unwrap_or_default().to_owned()
             }
-            Self::Dir { path, children: _ } => {
+            Self::Dir { path, .. } => {
                 let name = path.file_name().unwrap();
                 name.to_str().unwrap_or_default().to_owned() + "/"
             }
