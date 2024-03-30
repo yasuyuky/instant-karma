@@ -36,7 +36,7 @@ async fn handle_get(req: Request<()>) -> tide::Result {
             let mut options = Options::empty();
             options.insert(Options::ENABLE_STRIKETHROUGH);
             let parser = Parser::new_ext(s, options);
-            let mut rendered = String::new();
+            let mut rendered = String::default();
             html::push_html(&mut rendered, parser);
             let resp = RENDER_TEMPLATE
                 .replace("{id}", &k.to_string())
