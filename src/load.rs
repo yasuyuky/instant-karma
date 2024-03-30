@@ -10,7 +10,7 @@ pub fn put_dict(k: &Key, v: &str) {
 }
 
 pub fn load_stdin_to_dict(k: &Key) -> Result<(), std::io::Error> {
-    let mut buf = String::new();
+    let mut buf = String::default();
     let mut stdin = stdin();
     stdin.read_to_string(&mut buf)?;
     put_dict(k, &buf);
@@ -18,7 +18,7 @@ pub fn load_stdin_to_dict(k: &Key) -> Result<(), std::io::Error> {
 }
 
 pub fn load_file_to_dict(k: &Key, path: &Path) -> Result<(), std::io::Error> {
-    let mut buf = String::new();
+    let mut buf = String::default();
     let mut f = std::fs::File::open(path)?;
     f.read_to_string(&mut buf)?;
     put_dict(k, &buf);
