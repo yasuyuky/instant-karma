@@ -21,6 +21,6 @@ pulldown-cmark = { version = "0.11.0", default-features = false, features = ["ht
 serde = "1.0.203"
 structopt = "0.3.26"
 tide = "0.16.0"
-toml = "0.8.13"
+toml = "0.8.14"
 uuid = {version="1.8.0", features=["serde", "v4"]}
 log = "0.4.21"
