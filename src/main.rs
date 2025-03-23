@@ -4,6 +4,7 @@ use structopt::StructOpt;
 
 mod config;
 mod copy;
+mod db;
 mod key;
 mod load;
 mod logger;
@@ -27,7 +28,8 @@ enum Command {
 }
 
 #[async_std::main]
-async fn main() -> tide::Result<()> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    db::initialize().await?;
     log::set_logger(&logger::CONSOLE_LOGGER).unwrap_or_default();
     log::set_max_level(log::LevelFilter::Info);
     let opt = Opt::from_args();
