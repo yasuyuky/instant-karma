@@ -1,12 +1,7 @@
 use crate::config::Config;
 use crate::key::Key;
 use once_cell::sync::Lazy;
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::Mutex;
-
-pub static mut GLOBAL_DATA: Lazy<Mutex<HashMap<Key, String>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub static COPY_TEMPLATE: &str = include_str!("html/copy.html");
 
