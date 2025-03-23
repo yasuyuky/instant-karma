@@ -1,6 +1,6 @@
+use crate::db;
 use crate::key::Key;
 use crate::load::load_file_to_dict;
-use crate::statics::*;
 use async_std::sync::Mutex as AsyncMutex;
 use notify::{recommended_watcher, RecursiveMode, Watcher};
 use once_cell::sync::Lazy;
@@ -51,18 +51,16 @@ where
 {
     let key = Key::from(req.param("id")?);
     let path = PathBuf::from(req.param("path")?);
-    if let Ok(d) = unsafe { GLOBAL_DATA.lock() } {
-        if !d.contains_key(&key) {
-            return Err(tide::Error::new(
-                403,
-                std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
-            ));
-        }
+    if db::get_content(&key).await.ok().is_none() {
+        return Err(tide::Error::new(
+            403,
+            std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid key"),
+        ));
     }
     let arx = async_watch_modified(&path);
     loop {
         arx.recv().await?;
-        load_file_to_dict(&key, &path)?;
+        load_file_to_dict(&key, &path).await.expect("load error");
         sender.send("", "", None).await?;
     }
 }
