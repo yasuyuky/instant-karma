@@ -127,9 +127,9 @@ dependencies = [
 
 [[package]]
 name = "async-channel"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16c74e56284d2188cabb6ad99603d1ace887a5d7e7b695d01b728155ed9ed427"
+checksum = "924ed96dd52d1b75e9c1a3e6275715fd320f5f9439fb5a4a11fa51f4221158d2"
 dependencies = [
  "concurrent-queue",
  "event-listener-strategy 0.5.4",
@@ -175,7 +175,7 @@ version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05b1b633a2115cd122d73b955eadd9916c18c8f510ec9cd1686404c60ad1c29c"
 dependencies = [
- "async-channel 2.4.0",
+ "async-channel 2.5.0",
  "async-executor",
  "async-io 2.3.2",
  "async-lock 3.3.0",
@@ -266,7 +266,7 @@ version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7eda79bbd84e29c2b308d1dc099d7de8dcc7035e48f4bf5dc4a531a44ff5e2a"
 dependencies = [
- "async-channel 2.4.0",
+ "async-channel 2.5.0",
  "async-io 2.3.2",
  "async-lock 3.3.0",
  "async-signal",
@@ -503,7 +503,7 @@ version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "495f7104e962b7356f0aeb34247aca1fe7d2e783b346582db7f2904cb5717e88"
 dependencies = [
- "async-channel 2.4.0",
+ "async-channel 2.5.0",
  "async-lock 3.3.0",
  "async-task",
  "futures-io",
@@ -1364,7 +1364,7 @@ dependencies = [
 name = "instant-karma"
 version = "0.1.0"
 dependencies = [
- "async-channel 2.4.0",
+ "async-channel 2.5.0",
  "async-ctrlc",
  "async-std",
  "html-escape",
