@@ -10,7 +10,7 @@ name = "ik"
 path = "src/main.rs"
 
 [dependencies]
-sqlx = { version = "0.8", features = ["runtime-async-std", "sqlite"] }
+sqlx = { version = "0.9", features = ["runtime-async-std", "sqlite"] }
 async-channel = "2.5.0"
 async-ctrlc = "1.2.0"
 async-std = { version = "1.13.2", features = ["attributes"] }
